@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Dashboard</title>
+    </head>
+    <body>
+        <h1>Welcome, {{ email }}!</h1>
+        <p>This is your dashboard.</p>
+
+        <button onclick="window.location.href='{% url 'product-api' %}'">Go to Product Page</button>
+    </body>
+</html>

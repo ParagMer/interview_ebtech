@@ -1,0 +1,6 @@
+env
+.vscode
+etech/__pycache__
+etech_app/__pycache__
+etech_app/migrations
+db.sqlite3

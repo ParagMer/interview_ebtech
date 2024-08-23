@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Create Product</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    <body>
+        <h1>Create a New Product</h1>
+        <form id="productForm" method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Create Product</button>
+        </form>
+
+        <h2>Product List</h2>
+        <div id="productList">
+            {% for product in products %}
+                <p>{{ product.name }} - ${{ product.price }}</p>
+            {% endfor %}
+        </div>
+
+        <script>
+            $(document).ready(function() {
+                $('#productForm').on('submit', function(event) {
+                    event.preventDefault();
+                    const formData = $(this).serialize();
+
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'product-api' %}",
+                        data: formData,
+                        success: function (response) {
+                            alert(response.message);
+                            location.reload(); // Reload the page to show the new product
+                        },
+                        error: function (error) {
+                            alert('Error: ' + JSON.stringify(error.responseJSON.errors));
+                        }
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

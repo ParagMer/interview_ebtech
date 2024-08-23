@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    </head>
+    <body>
+        <form method="POST" id="loginForm">
+            <div id="login" class="login">
+                <label for="email">Email</label>
+                <input type="text" id="email" name="email" /><br>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" /><br>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </body>
+    <script>
+        function getCSRFTokenValue() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [key, value] = cookie.trim().split('=');
+                if (key === 'csrftoken') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        function ajaxCall(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const csrfToken = getCSRFTokenValue();
+
+            $.ajax({
+                type: "POST",
+                url: '{% url "login" %}',
+                data: {
+                    email: email,
+                    password: password,
+                    csrfmiddlewaretoken: csrfToken
+                },
+                success: function (data) {
+                    if (data.redirect_url) {
+                        window.location.href = '{% url "dashboard" %}'
+                    } else {
+                        console.log(data);
+                    }
+                },
+                error: function (error) {
+                    console.log(`Error: ${error.responseText}`);
+                }
+            });
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', ajaxCall);
+    </script>
+</html>
