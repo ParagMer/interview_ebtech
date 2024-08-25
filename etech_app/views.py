@@ -10,12 +10,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
 from etech_app.forms import ProductForm
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
-# Create your views here.
 
-def get_refresh_token(user):
-    token = RefreshToken.for_user(user)
-    return {"access": str(token.access_token), "refresh": str(token)}
+# ------------------------------------------------------------DRF PART----------------------------------------------------------
+# def get_refresh_token(user):
+#     token = RefreshToken.for_user(user)
+#     return {"access": str(token.access_token), "refresh": str(token)}
 
 # class users_login(APIView):
 #     permission_classes = (AllowAny,)
@@ -45,6 +46,9 @@ def get_refresh_token(user):
 #         except Exception as e:
 #             print(e)
 
+
+
+# ------------------------------------------------------------DJANGO PART----------------------------------------------------------
 @csrf_exempt
 def users_login(request):
     if request.method == "POST":
@@ -61,7 +65,7 @@ def users_login(request):
             user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
-                return JsonResponse({"message": "Login Successful", "redirect_url": "/dashboard/"})
+                return JsonResponse({"message": "Login Successful", "redirect_url": "/index/"}, status=status.HTTP_200_OK)
             else:
                 return JsonResponse({"message": "Invalid Credentials"}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         except User.DoesNotExist:
@@ -73,8 +77,9 @@ def users_login(request):
 
 @login_required
 def dashboard(request):
+    # return render(request, "index.html")
     user_email = request.user.email
-    return render(request, "dashboard.html", {"email": user_email})
+    return render(request, "index.html", {"email": user_email})
 
 @login_required
 def product_api(request):
@@ -86,6 +91,14 @@ def product_api(request):
         else:
             return JsonResponse({"errors": form.errors}, status=400)
     else:
-        products = Product.objects.all()
         form = ProductForm()
-        return render(request, "product_form.html", {"form": form, "products": products})
+        return render(request, "side-menu-light-add-product.html", {"form": form})
+
+@login_required
+def productListing(request):
+    if request.method == "GET":
+        products = Product.objects.all()
+        paginator = Paginator(products, 10)  # Show 10 products per page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        return render(request, "side-menu-light-product-list.html", {"page_obj": page_obj})
